@@ -133,7 +133,7 @@ def read_keys():
     with open('tools/twitter keys.json', 'r') as keyfile:
         keys = json.load(keyfile)
     if 'TWITTER_ACCESS_TOKEN' not in keys:
-        access_token, access_key = twitter.oauth_dance('messingaround1',
+        access_token, access_key = twitter.oauth_dance('Term Ticker',
                                                        keys['TWITTER_CONSUMER_KEY'],
                                                        keys['TWITTER_CONSUMER_SECRET'])
         keys['TWITTER_ACCESS_TOKEN'] = access_token
