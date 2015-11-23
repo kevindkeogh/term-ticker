@@ -9,3 +9,6 @@ Please feel free to reach out. Thanks.
 
 # Areas currently under development
 The monitor window is currently not built at all, so that is currently the priority. I'm also slowly building additional commands, they will be written on an ad-hoc basis until the monitor window can display stuff.
+
+# Screenshot
+![term ticker image](http://i.imgur.com/jEeJmu9.png)
