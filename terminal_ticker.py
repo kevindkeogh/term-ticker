@@ -83,9 +83,9 @@ def start_terminal_ticker(stdscr, twitter_keys):
             input_window.clear()
         except KeyboardInterrupt:
             return
-        finally:
-            curses.endwin()
-            connection.close()
+    
+    curses.endwin()
+    connection.close()
 
 def main(stdscr, twitter_keys):
     curses.curs_set(0)
