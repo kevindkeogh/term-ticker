@@ -54,15 +54,8 @@ class TermTickerTweet:
         #        full_text = full_text.replace(url['url'], url['expanded_url'])
         return full_text
 
-    def save_tweet(self, tweet, filepath):
-        """
-        Saves tweet to json file.
-        TODO: update so that these are saved to a db. Probably need to consider multi-threading if
-        I do this.
-        """
-        jsonfile = open(filepath, 'a')
-        jsonfile.write("{}\n".format(json.dumps(tweet)))
-        jsonfile.close()
+
+
 
     def parse_tweet_to_list(self, text_string, line_length):
         lines = text_string.splitlines()
@@ -89,6 +82,15 @@ class TermTickerTweet:
                     current_line = word
         return text_strings
 
+def save_tweet(connection, tweet):
+    sql_insert_tweet = ''' INSERT INTO
+                           TWITTER_TWEETS(username, time, json)
+                           VALUES (?, ? ,?)
+                       '''
+    db_entry = (tweet.handle[0], tweet.timestamp[0], str(tweet.tweet))
+    connection.cursor().execute(sql_insert_tweet, db_entry)
+    connection.commit()
+
 def auth_and_return_stream(keys):
     auth = twitter.OAuth(keys['TWITTER_ACCESS_TOKEN'],
                          keys['TWITTER_ACCESS_KEY'], 
@@ -98,16 +100,32 @@ def auth_and_return_stream(keys):
     return stream
 
 def twitter_feed(**termticker_dict):
-    window = termticker_dict['window_dict']['twitter']
-    lock = termticker_dict['lock']
-    keys = termticker_dict['twitter_keys']
-    stream = auth_and_return_stream(keys)
-    _, line_length = window.getmaxyx()
-    line_length = line_length - 2 # minus the border
+    """
+    """
+    # get useful variables
+    window                  = termticker_dict['window_dict']['twitter']
+    lock                    = termticker_dict['lock']
+    keys                    = termticker_dict['twitter_keys']
+    connection              = termticker_dict['connection']
+    
+    # authenticate and create stream
+    stream                  = auth_and_return_stream(keys)
+    
+    # get line length for printing tweets 
+    _, line_length          = window.getmaxyx()
+    line_length             = line_length - 2 # minus the border
+    
+    # create twitter table (if needed) to save tweets
+    sql_create_table_tweets = ''' CREATE TABLE if not EXISTS
+                                  TWITTER_TWEETS
+                                  (username TEXT, time TEXT, json TEXT)
+                              '''
+    connection.cursor().execute(sql_create_table_tweets)
     for tweet in stream.user():
-        if tweet.get('text'):
-            with lock:
+        with lock:
+            if tweet.get('text'):
                 twt = TermTickerTweet(tweet, line_length)
+                save_tweet(connection, twt)
                 commands.scroll_and_add_line(termticker_dict, 
                                               'twitter',
                                               '￣')
@@ -123,10 +141,10 @@ def twitter_feed(**termticker_dict):
                 commands.scroll_and_add_line(termticker_dict,
                                               'twitter',
                                               twt.text)
-        if tweet.get('heartbeat_timeout'):
-            commands.scroll_and_add_line(termticker_dict, 
-                                              'twitter',
-                                              'Twitter timed out.')
+            elif tweet.get('heartbeat_timeout'):
+                commands.scroll_and_add_line(termticker_dict, 
+                                                  'twitter',
+                                                  'Twitter timed out.')
 
 
 def read_keys():
