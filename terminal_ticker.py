@@ -45,12 +45,12 @@ def start_terminal_ticker(stdscr, twitter_keys):
     twitter_thread = threading.Thread(name   = 'twitter_thread',
                                       target = twitter_tools.twitter_feed,
                                       kwargs = termticker_dict)
-    threads.add(twitter_thread)
 
     rss_thread     = threading.Thread(name   = 'rss_thread',
                                       target = rss_tools.rss_feed,
                                       kwargs = termticker_dict)
-    
+
+    threads.add(twitter_thread)
     threads.add(rss_thread)
 
     for thread in threads:
@@ -85,6 +85,7 @@ def start_terminal_ticker(stdscr, twitter_keys):
             return
         finally:
             curses.endwin()
+            connection.close()
 
 def main(stdscr, twitter_keys):
     curses.curs_set(0)
