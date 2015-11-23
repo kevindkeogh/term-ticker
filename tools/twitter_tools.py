@@ -6,6 +6,7 @@ import time
 
 # external dependencies
 import twitter
+import twitter.api
 
 # term ticker
 import commands
@@ -123,7 +124,7 @@ def save_tweet(connection, tweet):
     connection.cursor().execute(sql_insert_tweet, db_entry)
     connection.commit()
 
-def auth_and_return_stream(keys):
+def auth_and_return_stream(input_window, keys):
     """
     Authenticates and returns twitter stream object (using the twitter library
     by sixohsix -- https://github.com/sixohsix/twitter).
@@ -134,12 +135,15 @@ def auth_and_return_stream(keys):
     Returns:
         stream (twitter object), object that yields live tweets
     """
-    auth   = twitter.OAuth(keys['TWITTER_ACCESS_TOKEN'],
-                           keys['TWITTER_ACCESS_KEY'], 
-                           keys['TWITTER_CONSUMER_KEY'],
-                           keys['TWITTER_CONSUMER_SECRET'])
-    stream = twitter.TwitterStream(auth=auth, domain='userstream.twitter.com')
-    return stream
+    try:
+        auth   = twitter.OAuth(keys['TWITTER_ACCESS_TOKEN'],
+                               keys['TWITTER_ACCESS_KEY'], 
+                               keys['TWITTER_CONSUMER_KEY'],
+                               keys['TWITTER_CONSUMER_SECRET'])
+        stream = twitter.TwitterStream(auth=auth, domain='userstream.twitter.com')
+        return stream
+    except twitter.api.TwitterHTTPError:
+        commands.print_warning(input_window, 'Could not connect to Twitter')
 
 def twitter_feed(**termticker_dict):
     """
@@ -153,12 +157,13 @@ def twitter_feed(**termticker_dict):
     """
     # get useful variables
     window                  = termticker_dict['window_dict']['twitter']
+    input_window            = termticker_dict['input_window']
     lock                    = termticker_dict['lock']
     keys                    = termticker_dict['twitter_keys']
     connection              = termticker_dict['connection']
     
     # authenticate and create stream
-    stream                  = auth_and_return_stream(keys)
+    stream                  = auth_and_return_stream(input_window, keys)
     
     # get line length for printing tweets 
     _, line_length          = window.getmaxyx()
