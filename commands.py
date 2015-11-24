@@ -1,13 +1,16 @@
+import threading
+
 import commands
 import tools.rss_tools as rss_tools
+import tools.twitter_tools as twitter_tools
 
 ### CALLABLE COMMANDS
 
-def windowprint(termticker_dict, window_key, *args):
+def windowprint(termticker_dict, window_key, args):
     text_string = " ".join(args)
     commands.scroll_and_add_line(termticker_dict, window_key, text_string)
 
-def clear_window(termticker_dict, window_key, *args):
+def clear_window(termticker_dict, window_key, args):
     window = termticker_dict['window_dict'][window_key]
     window.clear()
     window.border()
@@ -23,11 +26,25 @@ def add_rss_feed(termticker_dict, window_key, args):
                               RSS_FEEDS(name, address)
                               VALUES (?, ?)
                           '''
-    name, address = args.split(' ')
+    name    = args.split(' ')[0]
+    address = (' '.join(args.split(' ')[1:])).replace(' ', '')
     connection.cursor().execute(sql_insert_rss_feed, (name, address))
     connection.commit()
 
+def restart_twitter_thread(termticker_dict, window_key, args):
+    if termticker_dict['threads']['twitter_thread'].is_alive():
+        print_warning(termticker_dict['input_window'], 'Thread is alive')
+    else:
+        start_thread('twitter_thread',
+                     twitter_tools.twitter_feed,
+                     termticker_dict)
+
 ### UTILITY COMMANDS
+
+def start_thread(name, target, kwargs):
+    return threading.Thread(name = name,
+                            target = target,
+                            kwargs = kwargs)
 
 def parse_input_text(input_string):
     window_key = input_string.split()[0].lower()
@@ -63,7 +80,8 @@ def set_commands_dict():
 
     twitter_commands = {
         'print'  : windowprint,
-        'clear'  : clear_window
+        'clear'  : clear_window,
+        'restart': restart_twitter_thread
     }
 
     monitor_commands = {

@@ -199,8 +199,11 @@ def twitter_feed(**termticker_dict):
                                               twt.text)
             elif tweet.get('heartbeat_timeout'):
                 commands.scroll_and_add_line(termticker_dict, 
-                                                  'twitter',
-                                                  'Twitter timed out.')
+                                              'twitter',
+                                              ' ')
+                commands.scroll_and_add_line(termticker_dict, 
+                                              'twitter',
+                                              'Twitter timed out.')
 
 
 def read_keys():

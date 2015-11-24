@@ -27,7 +27,6 @@ def start_terminal_ticker(stdscr, twitter_keys):
 
     # Set up threads
     lock = threading.Lock()
-    threads = set()
     connection = sqlite3.connect('term_ticker.db',
                                  check_same_thread=False)
 
@@ -42,20 +41,24 @@ def start_terminal_ticker(stdscr, twitter_keys):
     }
 
     # Create threads
-    twitter_thread = threading.Thread(name   = 'twitter_thread',
-                                      target = twitter_tools.twitter_feed,
-                                      kwargs = termticker_dict)
+    twitter_thread = commands.start_thread('twitter_thread',
+                                           twitter_tools.twitter_feed,
+                                           termticker_dict)
 
-    rss_thread     = threading.Thread(name   = 'rss_thread',
-                                      target = rss_tools.rss_feed,
-                                      kwargs = termticker_dict)
+    rss_thread     = commands.start_thread('rss_thread',
+                                           rss_tools.rss_feed,
+                                           termticker_dict)
 
-    threads.add(twitter_thread)
-    threads.add(rss_thread)
+    threads = {}
+    threads['twitter_thread'] = twitter_thread
+    threads['rss_thread']     = rss_thread
+    
 
-    for thread in threads:
+    for name, thread in threads.items():
         thread.daemon = True
         thread.start()
+
+    termticker_dict['threads'] = threads
 
     application_running = True
 
