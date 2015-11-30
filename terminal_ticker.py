@@ -5,8 +5,8 @@ import threading
 
 # term ticker
 import commands
+import tools.thread_manager as thread_manager
 import tools.twitter_tools as twitter_tools
-import tools.rss_tools as rss_tools
 import ui
 
 def start_terminal_ticker(stdscr, twitter_keys):
@@ -41,24 +41,10 @@ def start_terminal_ticker(stdscr, twitter_keys):
     }
 
     # Create threads
-    twitter_thread = commands.start_thread('twitter_thread',
-                                           twitter_tools.twitter_feed,
-                                           termticker_dict)
-
-    rss_thread     = commands.start_thread('rss_thread',
-                                           rss_tools.rss_feed,
-                                           termticker_dict)
-
-    threads = {}
-    threads['twitter_thread'] = twitter_thread
-    threads['rss_thread']     = rss_thread
-    
-
-    for name, thread in threads.items():
-        thread.daemon = True
-        thread.start()
-
-    termticker_dict['threads'] = threads
+    term_threads = thread_manager.TermTickerThreadManager(termticker_dict)
+    threads = ['twitter_thread', 'rss_thread']
+    for thread in threads:
+        term_threads.add_thread(thread)
 
     application_running = True
 
@@ -72,15 +58,23 @@ def start_terminal_ticker(stdscr, twitter_keys):
             window_key, command_key, args = commands.parse_input_text(message)
             if window_key in window_dict:
                 if command_key in commands_dict[window_key]:
-                    commands_dict[window_key][command_key](termticker_dict, window_key, args)
+                    commands_dict[window_key][command_key](termticker_dict,
+                                                           window_key,
+                                                           args)
+                elif command_key in term_threads.commands_dict:
+                    term_threads.commands_dict[command_key](window_key,
+                                                            command_key,
+                                                            args)
                 else:
                     commands.print_warning(input_window, 
-                                   'Command does not exist. Press any key to continue')
+                                           'Command does not exist. \
+                                           Press any key to continue')
             elif window_key == 'all' and command_key == 'quit':
                 application_running = False
             else:
                 commands.print_warning(input_window, 
-                               'Window does not exist. Press any key to continue')
+                                       'Window does not exist. \
+                                       Press any key to continue')
             # elif window_key == 'all':
             #     all_commands[command_key](args)
             input_window.clear()

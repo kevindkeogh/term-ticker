@@ -41,11 +41,6 @@ def restart_twitter_thread(termticker_dict, window_key, args):
 
 ### UTILITY COMMANDS
 
-def start_thread(name, target, kwargs):
-    return threading.Thread(name = name,
-                            target = target,
-                            kwargs = kwargs)
-
 def parse_input_text(input_string):
     window_key = input_string.split()[0].lower()
     command_key = input_string.split()[1:2]

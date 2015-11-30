@@ -205,7 +205,6 @@ def twitter_feed(**termticker_dict):
                                               'twitter',
                                               'Twitter timed out.')
 
-
 def read_keys():
     """
     The read keys function reads the keys from the tools/twitter keys.json
