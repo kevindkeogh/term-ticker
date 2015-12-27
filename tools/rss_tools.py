@@ -8,10 +8,6 @@ import time
 # term ticker
 import commands
 
-def connect_db(db_name):
-    conn = sqlite3.connect(db_name)
-    return conn
-
 def setup_rss_tables(cursor):
     sql_create_table_rss_feeds = ''' CREATE TABLE if not EXISTS 
                                      RSS_FEEDS 
@@ -83,11 +79,6 @@ def insert_new_rss_entries(cursor, feed_tuple):
 def parse_feed(feed_url):
     rss_feed = feedparser.parse(feed_url)
     return rss_feed
-
-def disconnect_db(connection, commit=True):
-    if commit:
-        connection.commit()
-    connection.close()
 
 def poll_feeds(connection, rss_feeds, num_rows, poll=False):
     cursor = connection.cursor()

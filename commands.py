@@ -7,8 +7,8 @@ import tools.twitter_tools as twitter_tools
 ### CALLABLE COMMANDS
 
 def windowprint(termticker_dict, window_key, args):
-    text_string = " ".join(args)
-    commands.scroll_and_add_line(termticker_dict, window_key, text_string)
+    #text_string = " ".join(args)
+    commands.scroll_and_add_line(termticker_dict, window_key, args)
 
 def clear_window(termticker_dict, window_key, args):
     window = termticker_dict['window_dict'][window_key]
