@@ -64,4 +64,4 @@ target/
 jsonfile.txt
 term_ticker.db
 *~
-
+tools/twitter\ keys.json
