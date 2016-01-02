@@ -228,5 +228,5 @@ def read_keys():
         keys['TWITTER_ACCESS_TOKEN'] = access_token
         keys['TWITTER_ACCESS_KEY']   = access_key
         with open('tools/twitter keys.json', 'w') as keyfile:
-            keyfile.write(json.dumps(keys))
+            keyfile.write(json.dumps(keys, indent=4, sort_keys=True))
     return keys
