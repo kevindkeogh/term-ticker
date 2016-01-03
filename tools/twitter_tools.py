@@ -232,4 +232,4 @@ def read_keys():
                     }
         with open('tools/keys.json', 'w') as token_file:
             token_file.write(json.dumps(tokens, indent=4, sort_keys=True))
-    return dict(keys.items() | tokens['twitter'].items())
+    return keys.update(tokens)
