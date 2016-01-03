@@ -84,7 +84,6 @@ class TermTickerTweet():
         """
         lines = text_string.splitlines()
         text_strings = []
-        current_line = ''
         for line in lines:
             line = line.split(' ')
             current_line = ''
@@ -116,12 +115,12 @@ def save_tweet(connection, tweet):
         tweet (TermTickerTweet object), tweet object
 
     """
-    sql_insert_tweet = ''' INSERT INTO
-                           TWITTER_TWEETS(username, time, json)
-                           VALUES (?, ? ,?)
-                       '''
-    db_entry = (tweet.handle[0], tweet.timestamp[0], str(tweet.tweet))
-    connection.cursor().execute(sql_insert_tweet, db_entry)
+    sql_comamnd = ''' INSERT INTO
+                      TWITTER_TWEETS(username, time, json)
+                      VALUES (?, ? ,?)
+                  '''
+    db_entry    = (tweet.handle[0], tweet.timestamp[0], str(tweet.tweet))
+    connection.cursor().execute(sql_comamnd, db_entry)
     connection.commit()
 
 def auth_and_return_stream(input_window, keys):
@@ -140,8 +139,7 @@ def auth_and_return_stream(input_window, keys):
                                keys['TWITTER_ACCESS_KEY'], 
                                keys['TWITTER_CONSUMER_KEY'],
                                keys['TWITTER_CONSUMER_SECRET'])
-        stream = twitter.TwitterStream(auth=auth, domain='userstream.twitter.com')
-        return stream
+        return twitter.TwitterStream(auth=auth, domain='userstream.twitter.com')
     except twitter.api.TwitterHTTPError:
         commands.print_warning(input_window, 'Could not connect to Twitter')
 
@@ -156,25 +154,25 @@ def twitter_feed(**termticker_dict):
     that it has not already been created.
     """
     # get useful variables
-    window                  = termticker_dict['window_dict']['twitter']
-    input_window            = termticker_dict['input_window']
-    lock                    = termticker_dict['lock']
-    keys                    = termticker_dict['twitter_keys']
-    connection              = termticker_dict['connection']
+    window          = termticker_dict['window_dict']['twitter']
+    input_window    = termticker_dict['input_window']
+    lock            = termticker_dict['lock']
+    keys            = termticker_dict['twitter_keys']
+    connection      = termticker_dict['connection']
     
     # authenticate and create stream
-    stream                  = auth_and_return_stream(input_window, keys)
+    stream          = auth_and_return_stream(input_window, keys)
     
     # get line length for printing tweets 
-    _, line_length          = window.getmaxyx()
-    line_length             = line_length - 2 # minus the border
+    _, line_length  = window.getmaxyx()
+    line_length     = line_length - 2 # minus the border
     
     # create twitter table (if needed) to save tweets
-    sql_create_table_tweets = ''' CREATE TABLE if not EXISTS
-                                  TWITTER_TWEETS
-                                  (username TEXT, time TEXT, json TEXT)
-                              '''
-    connection.cursor().execute(sql_create_table_tweets)
+    sql_command     = ''' CREATE TABLE if not EXISTS
+                          TWITTER_TWEETS
+                          (username TEXT, time TEXT, json TEXT)
+                      '''
+    connection.cursor().execute(sql_command)
     
     # main twitter loop
     for tweet in stream.user():

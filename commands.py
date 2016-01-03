@@ -1,14 +1,12 @@
 import threading
 
-import commands
 import tools.rss_tools as rss_tools
 import tools.twitter_tools as twitter_tools
 
 ### CALLABLE COMMANDS
 
 def windowprint(termticker_dict, window_key, args):
-    #text_string = " ".join(args)
-    commands.scroll_and_add_line(termticker_dict, window_key, args)
+    scroll_and_add_line(termticker_dict, window_key, args)
 
 def clear_window(termticker_dict, window_key, args):
     window = termticker_dict['window_dict'][window_key]
@@ -21,14 +19,14 @@ def close_application(termticker_dict, window_key, args):
     curses.endwin()
 
 def add_rss_feed(termticker_dict, window_key, args):
-    connection = termticker_dict['connection']
-    sql_insert_rss_feed = ''' INSERT OR IGNORE INTO
-                              RSS_FEEDS(name, address)
-                              VALUES (?, ?)
-                          '''
-    name    = args.split(' ')[0]
-    address = (' '.join(args.split(' ')[1:])).replace(' ', '')
-    connection.cursor().execute(sql_insert_rss_feed, (name, address))
+    connection  = termticker_dict['connection']
+    sql_command = ''' INSERT OR IGNORE INTO
+                      RSS_FEEDS(name, address)
+                      VALUES (?, ?)
+                  '''
+    name        = args.split(' ')[0]
+    address     = (' '.join(args.split(' ')[1:])).replace(' ', '')
+    connection.cursor().execute(sql_command, (name, address))
     connection.commit()
 
 def restart_twitter_thread(termticker_dict, window_key, args):

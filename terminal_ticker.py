@@ -9,10 +9,10 @@ import tools.thread_manager as thread_manager
 import tools.twitter_tools as twitter_tools
 import ui
 
-def start_terminal_ticker(stdscr, twitter_keys):
+def start_terminal_ticker(stdscr):
 
     # Set up windows
-    window_dict = ui.set_window_parameters()
+    window_dict  = ui.set_window_parameters()
     input_window = window_dict['input']
     
     for name, window in window_dict.items():
@@ -20,22 +20,20 @@ def start_terminal_ticker(stdscr, twitter_keys):
             window.border()
             window.addstr(0, 0, name)
             window.refresh()
-            window.scrollok(True)   
+            window.scrollok(True)
 
-    # Get commands dict
+    # Get dict stuff
     commands_dict = commands.set_commands_dict()
-
-    # Set up threads
-    lock = threading.Lock()
     connection = sqlite3.connect('term_ticker.db',
                                  check_same_thread=False)
+    twitter_keys = twitter_tools.read_keys()
 
     # Create a global dict to pass stuff around the threads
     # and to pass the lock/queues when completing commands
     termticker_dict = {
         'connection'         : connection,
         'input_window'       : input_window,
-        'lock'               : lock,
+        'lock'               : threading.Lock(),
         'twitter_keys'       : twitter_keys,
         'window_dict'        : window_dict
     }
@@ -84,12 +82,12 @@ def start_terminal_ticker(stdscr, twitter_keys):
     curses.endwin()
     connection.close()
 
-def main(stdscr, twitter_keys):
+def main(stdscr):
     curses.curs_set(0)
-    start_terminal_ticker(curses.initscr(), twitter_keys)
+    start_terminal_ticker(curses.initscr())
 
 if __name__ == '__main__':
     # this needs to run first in case this is the first use,
     # and user needs to use browser to get access keys
-    twitter_keys = twitter_tools.read_keys()
-    curses.wrapper(main, twitter_keys)
+    twitter_tools.read_keys()
+    curses.wrapper(main)
