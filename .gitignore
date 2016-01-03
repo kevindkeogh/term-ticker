@@ -61,7 +61,7 @@ docs/_build/
 target/
 
 # Term ticker stuff
-jsonfile.txt
+tools/keys.json
 term_ticker.db
 *~
 

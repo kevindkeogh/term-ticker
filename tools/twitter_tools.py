@@ -217,14 +217,19 @@ def read_keys():
     Returns:
         keys (dict), dictionary of twitter keys/tokens used for authentication
     """
-    with open('tools/twitter keys.json', 'r') as keyfile:
-        keys = json.load(keyfile)
-    if 'TWITTER_ACCESS_TOKEN' not in keys:
+    keys = json.load(open('config.json','r'))['twitter']
+    try:
+        tokens = json.load(open('tools/keys.json', 'r'))
+    except OSError: # file doesn't exist
         access_token, access_key = twitter.oauth_dance('Term Ticker',
                                                        keys['TWITTER_CONSUMER_KEY'],
                                                        keys['TWITTER_CONSUMER_SECRET'])
-        keys['TWITTER_ACCESS_TOKEN'] = access_token
-        keys['TWITTER_ACCESS_KEY']   = access_key
-        with open('tools/twitter keys.json', 'w') as keyfile:
-            keyfile.write(json.dumps(keys, indent=4, sort_keys=True))
-    return keys
+        tokens =    {
+                        'twitter': {
+                            'TWITTER_ACCESS_TOKEN': access_token,
+                            'TWITTER_ACCESS_KEY'  : access_key
+                        }
+                    }
+        with open('tools/keys.json', 'w') as token_file:
+            token_file.write(json.dumps(tokens, indent=4, sort_keys=True))
+    return dict(keys.items() | tokens['twitter'].items())
