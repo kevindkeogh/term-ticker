@@ -1,5 +1,6 @@
 # standard library
 from datetime import datetime, timedelta
+from functools import reduce
 import json
 from html import unescape
 import time
@@ -219,7 +220,8 @@ def read_keys():
     """
     keys = json.load(open('config.json','r'))['twitter']
     try:
-        tokens = json.load(open('tools/keys.json', 'r'))
+        tokens = json.load(open('tools/keys.json', 'r'))['twitter']
+
     except OSError: # file doesn't exist
         access_token, access_key = twitter.oauth_dance('Term Ticker',
                                                        keys['TWITTER_CONSUMER_KEY'],
@@ -232,4 +234,5 @@ def read_keys():
                     }
         with open('tools/keys.json', 'w') as token_file:
             token_file.write(json.dumps(tokens, indent=4, sort_keys=True))
-    return keys.update(tokens)
+
+    return reduce(lambda x,y: dict(x, **y), (keys, tokens))
